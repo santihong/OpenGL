@@ -43,16 +43,16 @@ int main() {
 
     // Create and bind VAO.
     // VAOs: on VAO contain one VBO, one VBO contains multi vertex attributes.
-    GLuint VAO[2];
-    glGenVertexArrays(2, VAO);
-    glBindVertexArray(VAO[0]);
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
     
     // First traiangle.
     // Create and bind VBO.
     float vertices[] = {
-        -0.5, -0.5, 0.5,
-        0.5, -0.5, -0.5,
-        0, 0.5, 1,
+        -0.5, -0.5, 0.5, 1.0, 0.0, 0.0,
+        0.5, -0.5, -0.5, 0.0, 1.0, 0.0,
+        0, 0.5, 1, 0.0, 0.0, 1.0,
     };
     GLuint VBO;
     glGenBuffers(1, &VBO);
@@ -67,25 +67,12 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Set vertex data for shader input.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Second triangle.
-    // Create and bind VBO.
-    glBindVertexArray(VAO[1]);
-    float vertices2[] = {
-        0, 0, 0,
-        0.5, 0.5, 0,
-        1, 0, 0,
-    };
-    GLuint VBO2;
-    glGenBuffers(1, &VBO2);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
-
-    // Set vertex data for shader input.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    // Set vertex color data for shader input.
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Load and compile shader program.
     GLuint program = Utils::loadShader("triangle.vert", "triangle.frag");
@@ -98,17 +85,12 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
-        glClearColor(0, 1, 0, 0.5);
+        glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw objects...
-        glBindVertexArray(VAO[0]);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-
-        glBindVertexArray(VAO[1]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

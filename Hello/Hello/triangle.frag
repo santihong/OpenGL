@@ -1,7 +1,13 @@
 #version 330 core
 
 in vec4 vertexColor;
+in vec2 texCoord;
+
 out vec4 FragColor;
+
+uniform vec4 tilingColor;
+uniform sampler2D aTexture;
+
 void main() {
-	FragColor = vertexColor;
+	FragColor = texture(aTexture, texCoord) * vertexColor;
 }

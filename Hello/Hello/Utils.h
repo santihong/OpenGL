@@ -10,7 +10,6 @@
 class Utils {
 public:
     static std::string readFile(const char* filePath);
-    static GLuint loadShader(const char* vertex_path, const char* fragment_path);
 };
 
 #endif

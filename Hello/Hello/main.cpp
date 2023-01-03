@@ -55,10 +55,10 @@ int main() {
     // Create and bind VBO.
     float vertices[] = {
          // positions           // color            // texture coords TODO: why texture coords must be -1, otherwise image shows oppsite.
-         0.5f,  0.5f, 0.0f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
-         0.5f, -0.5f, 0.0f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
+         0.5f,  0.5f, 0.0f,     1.0, 0.0, 0.0,      -1.0, -1.0, // top right
+         0.5f, -0.5f, 0.0f,     0.0, 1.0, 0.0,      -1.0, 0.0, // bottom right
         -0.5f, -0.5f, 0.0f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
-        -0.5f,  0.5f, 0.0f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
+        -0.5f,  0.5f, 0.0f,     1.0, 0.0, 1.0,      0.0, -1.0, // top left
     };
 
     GLuint VBO;

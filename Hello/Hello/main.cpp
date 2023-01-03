@@ -54,11 +54,11 @@ int main() {
     // First traiangle.
     // Create and bind VBO.
     float vertices[] = {
-         // positions           // color            // texture coords TODO: why texture coords must be -1, otherwise image shows oppsite.
-         0.5f,  0.5f, 0.0f,     1.0, 0.0, 0.0,      -1.0, -1.0, // top right
-         0.5f, -0.5f, 0.0f,     0.0, 1.0, 0.0,      -1.0, 0.0, // bottom right
+         // positions           // color            // texture coords
+         0.5f,  0.5f, 0.0f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
+         0.5f, -0.5f, 0.0f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
         -0.5f, -0.5f, 0.0f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
-        -0.5f,  0.5f, 0.0f,     1.0, 0.0, 1.0,      0.0, -1.0, // top left
+        -0.5f,  0.5f, 0.0f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
     };
 
     GLuint VBO;
@@ -89,33 +89,64 @@ int main() {
     glEnableVertexAttribArray(2);
 
     // Load texture and bind.
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    unsigned int textures[2];
+    glGenTextures(2, textures);
+
+    // Load first image.
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
     // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load and generate the texture
+    // OpenGL (0, 0) is bottom-left, image file read by library (0, 0) is top-left. So here need to flip y.
+    stbi_set_flip_vertically_on_load(true);
     int width, height, nChannels;
-    unsigned char* data = stbi_load("lenna.png", &width, &height, &nChannels, 0);
+    const char* image1_path = "lenna.png";
+    unsigned char* data = stbi_load(image1_path, &width, &height, &nChannels, 0);
     if (data)
     {
-        cout << "image: " << width << ", " << height << ", " << nChannels << endl;
+        cout << image1_path << ": " << width << ", " << height << ", " << nChannels << endl;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture: " << image1_path << std::endl;
+        return -1;
+    }
+    stbi_image_free(data);
+
+    // Load second image.
+    const char* image2_path = "rocket.png";
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    data = stbi_load(image2_path, &width, &height, &nChannels, 0);
+    if (data)
+    {
+        cout << image2_path << ": " << width << ", " << height << ", " << nChannels << endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture: " << image2_path << std::endl;
         return -1;
     }
     stbi_image_free(data);
 
     // Load and compile shader program.
     Shader shader("triangle.vert", "triangle.frag");
-    shader.use();
+    shader.use(); // Must activate before set uniforms!
+
+    // Bind texture sampler.
+    shader.setInt("aTex1", 0);
+    shader.setInt("aTex2", 1);
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
@@ -129,7 +160,11 @@ int main() {
         shader.setVec4f("tilingColor", 0.0f, greenValue, 0.0f, 1.0f);
 
         // Draw objects...
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textures[1]);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

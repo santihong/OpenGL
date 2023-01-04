@@ -58,10 +58,15 @@ int main() {
     // Create and bind VBO.
     float vertices[] = {
          // positions           // color            // texture coords
-         0.5f,  0.5f, 0.0f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
-         0.5f, -0.5f, 0.0f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
-        -0.5f, -0.5f, 0.0f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
-        -0.5f,  0.5f, 0.0f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
+         0.5f,  0.5f, 0.5f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
+         0.5f, -0.5f, 0.5f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
+        -0.5f, -0.5f, 0.5f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
+        -0.5f,  0.5f, 0.5f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
+
+        0.5f,  0.5f, -0.5f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
+        0.5f, -0.5f, -0.5f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
+        -0.5f, -0.5f, -0.5f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
+        -0.5f,  0.5f, -0.5f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
     };
 
     GLuint VBO;
@@ -70,9 +75,31 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Use EBO instead of VBO, to decrease duplicate vertices.
+    // cube
     unsigned int indices[] = {  // note that we start from 0!
+        // up
         0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
+        1, 2, 3,    // second triangle
+
+        // down
+        4, 5, 7,
+        5, 6, 7,
+
+        // font
+        1, 2, 5,
+        2, 5, 6,
+
+        // back
+        0, 3, 4,
+        3, 4, 7,
+
+        // left
+        2, 3, 7,
+        2, 6, 7,
+
+        // right
+        0, 1, 4,
+        1, 4, 5,
     };
     GLuint EBO;
     glGenBuffers(1, &EBO);
@@ -163,11 +190,20 @@ int main() {
         shader.setVec4f("tilingColor", 0.0f, greenValue, 0.0f, 1.0f);
 
         // Transform vertices.
-        glm::mat4 trans = glm::mat4(1.0f);
-        //trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
-        unsigned int transformLoc = glGetUniformLocation(shader.ID, "aTransform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        // model matrix.
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+        shader.setMatrix4fv("model", glm::value_ptr(model));
+
+        // view matrix.
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        shader.setMatrix4fv("view", glm::value_ptr(view));
+
+        // projection matrix.
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        shader.setMatrix4fv("projection", glm::value_ptr(projection));
 
         // Draw objects...
         glActiveTexture(GL_TEXTURE0);
@@ -176,7 +212,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, textures[1]);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

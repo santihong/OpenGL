@@ -23,6 +23,7 @@ public:
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
     void setVec4f(const std::string& name, float v0, float v1, float v2, float v3) const;
+    void setMatrix4fv(const std::string& name, const GLfloat* value) const;
 };
 
 #endif

@@ -101,7 +101,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>G:\code\OpenGL\glad\include;G:\code\OpenGL\glfw\include;$(IncludePath)</IncludePath>
+    <IncludePath>G:\code\OpenGL\glad\include;G:\code\OpenGL\glfw\include;G:\code\OpenGL\glm;$(IncludePath)</IncludePath>
     <LibraryPath>G:\code\OpenGL\glfw\lib-vc2019;$(LibraryPath)</LibraryPath>
     <SourcePath>G:\code\OpenGL\glad\src;$(SourcePath)</SourcePath>
   </PropertyGroup>

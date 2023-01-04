@@ -178,11 +178,25 @@ int main() {
     shader.setInt("aTex1", 0);
     shader.setInt("aTex2", 1);
 
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
+        glEnable(GL_DEPTH_TEST);
         glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // update the uniform color
         float timeValue = glfwGetTime();
@@ -191,9 +205,9 @@ int main() {
 
         // Transform vertices.
         // model matrix.
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 0.5f, 0.0f));
-        shader.setMatrix4fv("model", glm::value_ptr(model));
+        //glm::mat4 model = glm::mat4(1.0f);
+        //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+        //shader.setMatrix4fv("model", glm::value_ptr(model));
 
         // view matrix.
         glm::mat4 view = glm::mat4(1.0f);
@@ -212,7 +226,15 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, textures[1]);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * (i + 1);
+            model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shader.setMatrix4fv("model", glm::value_ptr(model));
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        }
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

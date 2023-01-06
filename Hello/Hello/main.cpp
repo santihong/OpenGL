@@ -56,55 +56,56 @@ int main() {
     
     // First traiangle.
     // Create and bind VBO.
+    // TODO texture coords not correct.
     float vertices[] = {
-         // positions           // color            // texture coords
-         0.5f,  0.5f, 0.5f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
-         0.5f, -0.5f, 0.5f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
-        -0.5f, -0.5f, 0.5f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
-        -0.5f,  0.5f, 0.5f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
-
-        0.5f,  0.5f, -0.5f,     1.0, 0.0, 0.0,      1.0, 1.0, // top right
-        0.5f, -0.5f, -0.5f,     0.0, 1.0, 0.0,      1.0, 0.0, // bottom right
-        -0.5f, -0.5f, -0.5f,     0.0, 0.0, 1.0,      0.0, 0.0, // bottom left
-        -0.5f,  0.5f, -0.5f,     1.0, 0.0, 1.0,      0.0, 1.0, // top left
+         // positions           // color                // texture coords
+        -0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,       0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f, 		1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,    0.0f, 0.0f, 1.0f,		1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,    1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f,		0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,		0.0f, 0.0f,
+							
+        -0.5f, -0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,		1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 1.0f,		1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, 0.0f,		0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,		0.0f, 0.0f,
+							
+        -0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,		0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,		0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 1.0f,		1.0f, 0.0f,
+							
+         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,		0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,		0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 1.0f,		1.0f, 0.0f,
+							
+        -0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,		1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,		0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,		0.0f, 1.0f,
+							
+        -0.5f,  0.5f, -0.5f,    1.0f, 0.0f, 0.0f,		0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 1.0f,		1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,		1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, 0.0f,		0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,    0.0f, 0.0f, 1.0f,		0.0f, 1.0f
     };
 
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Use EBO instead of VBO, to decrease duplicate vertices.
-    // cube
-    unsigned int indices[] = {  // note that we start from 0!
-        // up
-        0, 1, 3,   // first triangle
-        1, 2, 3,    // second triangle
-
-        // down
-        4, 5, 7,
-        5, 6, 7,
-
-        // font
-        1, 2, 5,
-        2, 5, 6,
-
-        // back
-        0, 3, 4,
-        3, 4, 7,
-
-        // left
-        2, 3, 7,
-        2, 6, 7,
-
-        // right
-        0, 1, 4,
-        1, 4, 5,
-    };
-    GLuint EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Set vertex data for shader input.
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -122,7 +123,7 @@ int main() {
     unsigned int textures[2];
     glGenTextures(2, textures);
 
-    // Load first image.
+    // 1. Load first image.
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -148,7 +149,7 @@ int main() {
     }
     stbi_image_free(data);
 
-    // Load second image.
+    // 2. Load second image.
     const char* image2_path = "rocket.png";
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -198,20 +199,9 @@ int main() {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // update the uniform color
-        float timeValue = glfwGetTime();
-        float greenValue = sin(timeValue) / 2.0f + 0.5f;
-        shader.setVec4f("tilingColor", 0.0f, greenValue, 0.0f, 1.0f);
-
-        // Transform vertices.
-        // model matrix.
-        //glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(-55.0f), glm::vec3(1.0f, 0.5f, 0.0f));
-        //shader.setMatrix4fv("model", glm::value_ptr(model));
-
         // view matrix.
         glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f + 2.0f * glm::sin(glfwGetTime())));
         shader.setMatrix4fv("view", glm::value_ptr(view));
 
         // projection matrix.
@@ -233,7 +223,7 @@ int main() {
             float angle = 20.0f * (i + 1);
             model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             shader.setMatrix4fv("model", glm::value_ptr(model));
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         glBindVertexArray(0);
 

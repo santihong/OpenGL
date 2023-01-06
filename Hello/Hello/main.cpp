@@ -11,15 +11,74 @@ using namespace std;
 
 #define STBI_FAILURE_USERMSG
 
+// frame params.
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+// camera params.
+const float cameraSpeed = 2.5f; // adjust accordingly
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+// mouse params.
+float lastX = 400, lastY = 300;
+float pitch = 0.0f;
+float yaw = -90.0f;
+const float sensitivity = 0.1f;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
+
+bool bFirstMouse = true;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (bFirstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        bFirstMouse = false;
     }
+    
+    float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // reversed since y-coordinates range from bottom to top
+	lastX = xpos;
+	lastY = ypos;
+
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+    
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if(pitch > 89.0f)
+	  pitch =  89.0f;
+	if(pitch < -89.0f)
+	  pitch = -89.0f;
+
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(direction);
+}
+
+void processInput(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, true);
+	}
+
+	// process input control camera.
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
 }
 
 int main() {
@@ -47,6 +106,8 @@ int main() {
     glViewport(0, 0, 800, 600);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // Create and bind VAO.
     // VAOs: on VAO contain one VBO, one VBO contains multi vertex attributes.
@@ -191,17 +252,27 @@ int main() {
         glm::vec3(1.5f,  0.2f, -1.5f),
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-
+    
     while (!glfwWindowShouldClose(window)) {
+		// process input.
         processInput(window);
+      
+        float curFrame = glfwGetTime();
+        if (lastFrame > 0.0f) {
+            deltaTime = curFrame - lastFrame;
+        }
+        lastFrame = curFrame;
 
         glEnable(GL_DEPTH_TEST);
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // view matrix.
-        glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f + 2.0f * glm::sin(glfwGetTime())));
+		const float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		glm::mat4 view;
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);  
         shader.setMatrix4fv("view", glm::value_ptr(view));
 
         // projection matrix.

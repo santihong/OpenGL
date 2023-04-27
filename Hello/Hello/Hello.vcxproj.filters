@@ -41,6 +41,12 @@
     <None Include="triangle.frag">
       <Filter>源文件\shaders</Filter>
     </None>
+    <None Include="light.frag">
+      <Filter>源文件\shaders</Filter>
+    </None>
+    <None Include="light.vert">
+      <Filter>源文件\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils.h">

@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include <iostream>
 #include <string>
@@ -24,6 +25,7 @@ public:
     void setFloat(const std::string& name, float value) const;
     void setVec4f(const std::string& name, float v0, float v1, float v2, float v3) const;
     void setVec3f(const std::string& name, float v0, float v1, float v2) const;
+    void setVec3f(const std::string& name, glm::vec3 v) const;
     void setMatrix4fv(const std::string& name, const GLfloat* value) const;
 };
 

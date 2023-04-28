@@ -81,6 +81,34 @@ void processInput(GLFWwindow* window) {
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
 }
 
+int bindTextureImage(GLuint texture, const char* imagePath) {
+    // OpenGL (0, 0) is bottom-left, image file read by library (0, 0) is top-left. So here need to flip y.
+    stbi_set_flip_vertically_on_load(true);
+    
+    int width, height, nChannels;
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    unsigned char* data = stbi_load(imagePath, &width, &height, &nChannels, 0);
+    if (data)
+    {
+        cout << imagePath << ": " << width << ", " << height << ", " << nChannels << endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture: " << imagePath << std::endl;
+        return -1;
+    }
+    stbi_image_free(data);
+
+    return 0;
+}
+
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -187,54 +215,9 @@ int main() {
     // Load texture and bind.
     unsigned int textures[2];
     glGenTextures(2, textures);
-
-    // 1. Load first image.
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load and generate the texture
-    // OpenGL (0, 0) is bottom-left, image file read by library (0, 0) is top-left. So here need to flip y.
-    stbi_set_flip_vertically_on_load(true);
-    int width, height, nChannels;
-    const char* image1_path = "lenna.png";
-    unsigned char* data = stbi_load(image1_path, &width, &height, &nChannels, 0);
-    if (data)
-    {
-        cout << image1_path << ": " << width << ", " << height << ", " << nChannels << endl;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture: " << image1_path << std::endl;
-        return -1;
-    }
-    stbi_image_free(data);
-
-    // 2. Load second image.
-    const char* image2_path = "rocket.png";
-    glBindTexture(GL_TEXTURE_2D, textures[1]);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    data = stbi_load(image2_path, &width, &height, &nChannels, 0);
-    if (data)
-    {
-        cout << image2_path << ": " << width << ", " << height << ", " << nChannels << endl;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture: " << image2_path << std::endl;
-        return -1;
-    }
-    stbi_image_free(data);
+    
+    bindTextureImage(textures[0], "box_diffuse.png");
+    bindTextureImage(textures[1], "box_spec.png");
 
     // Load and compile shader program.
     Shader shader("triangle.vert", "triangle.frag");
@@ -282,17 +265,16 @@ int main() {
         glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 		shader.use(); // Must activate before set uniforms!
-		shader.setVec3f("objectColor", 1.0f, 0.5f, 0.31f);
-		shader.setVec3f("lightColor",  1.0f, 1.0f, 1.0f);
-        shader.setFloat("ambient", 0.2f);
-        shader.setVec3f("lightPos", lightPos.x, lightPos.y, lightPos.z);
         shader.setVec3f("viewPos", cameraPos.x, cameraPos.y, cameraPos.z);
-        shader.setFloat("specular", 0.5);
-        shader.setFloat("specularPow", 32);
+        shader.setVec3f("light.position", lightPos.x, lightPos.y, lightPos.z);
+        shader.setVec3f("light.ambient",  0.2f, 0.2f, 0.2f);
+        shader.setVec3f("light.diffuse",  0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+        shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f); 
 
 		// Bind texture sampler.
-		//shader.setInt("aTex1", 0);
-		//shader.setInt("aTex2", 1);
+		shader.setInt("material.diffuse", 0);
+		shader.setInt("material.specular", 1);
+        shader.setFloat("material.shininess", 64);
 
         // view matrix.
 		const float radius = 10.0f;
@@ -308,10 +290,10 @@ int main() {
         shader.setMatrix4fv("projection", glm::value_ptr(projection));
 
         // Draw objects...
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, textures[0]);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, textures[1]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textures[1]);
 
         glBindVertexArray(VAO);
         for (unsigned int i = 0; i < 10; i++)

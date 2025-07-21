@@ -42,7 +42,6 @@
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\resource\crosshair.png" />
     <Image Include="lenna.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

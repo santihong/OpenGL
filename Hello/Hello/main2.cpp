@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "Shader.h"
+#include "stb_image.h"
 
 using namespace std;
 
@@ -53,11 +54,11 @@ int main()
 
 	// Vertex data.
 	float vertices[] = {
-		// position		// color	
-		0.5, 0.5, 0,	1, 0, 0, 1,
-		-0.5, 0.5, 0,	0, 1, 0, 1,
-		-0.5, -0.5, 0,	0, 0, 1, 1,
-		0.5, -0.5, 0,	1, 1, 1, 1
+		// position				// color		// texture coords
+		1.0f, 1.0f, 0.0f,		1, 0, 0,		1.0, 1.0,	
+		-1.0f, 1.0f, 0.0f,		0, 1, 0,		0.0, 1.0,
+		-1.0f, -1.0f, 0.0f,		0, 0, 1,		0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,		1, 1, 1,		1.0f, 0.0f,
 	};
 	
 	// vertex index data.
@@ -65,6 +66,34 @@ int main()
 		0, 1, 2,
 		0, 2, 3
 	};
+
+	// Load image
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Set image wrapper and filter params.
+	// wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nChannel;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char *data = stbi_load("lenna.png", &width, &height, &nChannel, 0);
+	if (!data) {
+		cerr << "Failed to load texture" << endl;
+		return -1;
+	}
+	else {
+		cout << "Loaded image width: " << width << ", height: " << height << ", channels: " << nChannel << endl;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
 
 	// 0. Bind VAO
 	GLuint VAO;
@@ -86,12 +115,16 @@ int main()
 	// Set vertex attribute for vs.
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// color attribute
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	// texture coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 	
 	// Unbind VAO.
 	glBindVertexArray(0);
@@ -105,6 +138,8 @@ int main()
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 	
+		glBindTexture(GL_TEXTURE_2D, texture);
+		
 		HelloShader.use();
 
 		// Set uniform params.
@@ -117,7 +152,7 @@ int main()
 		// Draw mode
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+	
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

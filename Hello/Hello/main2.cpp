@@ -8,7 +8,7 @@ using namespace std;
 
 void OnFrameSizeChanged(GLFWwindow* window, int width, int height)
 {
-	cout << "OnFrameSizeChanged: " << width << ", " << height << endl;
+	//cout << "OnFrameSizeChanged: " << width << ", " << height << endl;
 	glViewport(0, 0, width, height);
 }
 
@@ -18,6 +18,28 @@ void processInput(GLFWwindow* wind)
 	{
 		glfwSetWindowShouldClose(wind, true);
 	}
+}
+
+int init_texture(const char* img_path, GLuint texture)
+{
+	// Load image
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height, nChannel;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char *data = stbi_load(img_path, &width, &height, &nChannel, 0);
+	if (!data) {
+		cerr << "Failed to load texture: " << img_path << endl;
+		return -1;
+	}
+	else {
+		cout << "Loaded image: " << img_path << ", " << "width: " << width << ", height : " << height << ", channels : " << nChannel << endl;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
+	return 0;
 }
 
 int main()
@@ -67,11 +89,6 @@ int main()
 		0, 2, 3
 	};
 
-	// Load image
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
 	// Set image wrapper and filter params.
 	// wrapping
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -79,21 +96,6 @@ int main()
 	// filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, nChannel;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char *data = stbi_load("lenna.png", &width, &height, &nChannel, 0);
-	if (!data) {
-		cerr << "Failed to load texture" << endl;
-		return -1;
-	}
-	else {
-		cout << "Loaded image width: " << width << ", height: " << height << ", channels: " << nChannel << endl;
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	stbi_image_free(data);
-
 
 	// 0. Bind VAO
 	GLuint VAO;
@@ -125,6 +127,13 @@ int main()
 	// texture coords
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	// Gen image textures
+	GLuint texture1, texture2;
+	glGenTextures(1, &texture1);
+	glGenTextures(1, &texture2);
+	init_texture("lenna.png", texture1);
+	init_texture("rocket.png", texture2);
 	
 	// Unbind VAO.
 	glBindVertexArray(0);
@@ -138,9 +147,16 @@ int main()
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 	
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
 		
 		HelloShader.use();
+		
+		// tell shader bind texture uniform.
+		HelloShader.setInt("texture1", 0);
+		HelloShader.setInt("texture2", 1);
 
 		// Set uniform params.
 		float cur_time = glfwGetTime();

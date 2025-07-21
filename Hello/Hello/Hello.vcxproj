@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="lenna.png" />
+    <Image Include="rocket.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
